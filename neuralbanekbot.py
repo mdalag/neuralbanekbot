@@ -1,6 +1,7 @@
 import logging
 import glob
 import random
+import os
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -9,19 +10,17 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-PATH = './aneks_vk/*.txt'
-TOKEN = 'TOKEN'
-# Reads API token from local file
-with open('./private', 'r') as f:
-    TOKEN = f.read()
+TOKEN = str(os.environ.get('TOKEN'))
+PORT = int(os.environ.get('PORT', '9349'))
+APP_NAME = str(os.environ.get('APP_NAME'))
+
 
 def start(update, context):
-    update.message.reply_text
-    (
-    'ОГОГО ЁБАНЫЙ РОТ! Я - искусственный интеллект, мне скормили более 3000'\
-    ' анеков! Напиши /banek, чтобы получить мой авторский prikol.'\
-    )
-    
+    update.message.reply_text('ОГОГО ЁБАНЫЙ РОТ! Я - искусственный интеллект,'
+    'мне скормили более 3000 анеков! Напиши /banek, чтобы получить мой авторский'
+    'prikol.')
+
+
 def help(update, context):
     update.message.reply_text('Напиши мне /banek, чтобы ржака')
 
@@ -35,21 +34,17 @@ def error(update, context):
 
 
 def get_banek(update, context):
-    '''
-    This func won't work without local storage of jokes
-    The storage name defined in PATH variable
-    '''
-    files = glob.glob(PATH)
-    # Takes random joke number from available range
-    anek_number = random.randint(0, files.__len__())
-    with open(files[anek_number], 'r') as f:
-        update.message.reply_text('Пока мне мозги не подвезли и я не умею придумывать'\
-            ' новые ржачьки, так что держи один из тех анеков, что я знаю:\n\n\n' + f.read())
+    update.message.reply_text('Пока мне мозги не подвезли и я не умею придумывать ржомбу')
 
 
 def main():
     logger.warning('STARTING...')
     updater = Updater(TOKEN, use_context=True)
+    updater.start_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN)
+    updater.bot.setWebhook("https://{}.herokuapp.com/{}".format(APP_NAME, TOKEN))
 
     dp = updater.dispatcher
 
@@ -62,7 +57,6 @@ def main():
     dp.add_error_handler(error)
 
     updater.start_polling()
-
     updater.idle()
 
 
